@@ -7,6 +7,11 @@ class Packages:
         self.packages = []
 
     def parse(self, raw_data):
+        """
+        Parse the 'Packages' file downloaded from the Debian ftp.
+
+        return a list of each package represented by a dictionnary
+        """
         for pkg_data in raw_data.split('\n\n'):
             pkg = {}
             for l in pkg_data.split('\n'):
@@ -19,6 +24,7 @@ class Packages:
 
                 if key in ['Depends', 'Pre-Depends', 'Recommends',
                         'Suggests', 'Replaces', 'Provides']:
+                    # remove the package version constraint
                     regex = re.compile(r'\(.*?\)', re.MULTILINE)
                     special_infos = regex.sub('', value).split(',')
                     pkg[key] = strip_str_list(special_infos)
@@ -28,6 +34,14 @@ class Packages:
 
 
     def list_dependencies(self, pkg_name):
+        """
+        Find all the dependencies of a given package.
+
+        pkg_name: name of the package for which we have to find
+            the dependencies
+        return a list of string representing the name of the dependencies
+        throw PackageNotFoundError if a package is not found
+        """
         dependencies = []
 
         to_check = [pkg_name]
@@ -43,6 +57,8 @@ class Packages:
 
             if pkg['Package'] not in dependencies:
                 dependencies.append(pkg['Package'])
+                # the package name ('Package') and the package searched name
+                # 'Name' could be different.
                 checked.append(pkg['Name'])
 
             deps = self._find_package_dependencies(pkg)
@@ -57,6 +73,14 @@ class Packages:
         return dependencies
 
     def _handle_or_dependencies(self, or_dep_data):
+        """
+        Handle the package dependencies where we have more than
+        one choice for a given package.
+
+        or_dep_data: string wich contain raw_data for the
+            choice of package
+        return the name of the package that we choosed
+        """
         if '|' not in or_dep_data:
             return or_dep_data
 
@@ -64,6 +88,14 @@ class Packages:
         return self._best_or_pkg_callback(or_deps)
 
     def _best_or_pkg_callback(self, or_deps):
+        """
+        Choose the package that has the least dependencies of
+        one level.
+
+        or_deps: list of possible packages
+        return the name of the choosed package
+        throw PackageNotFoundError if a package is not found
+        """
         best_pkg_name = ''
         best_pkg_dep_num = 100
         for dep in or_deps:
@@ -79,6 +111,14 @@ class Packages:
         return best_pkg_name
 
     def _find_package_dependencies(self, pkg, optional_keys=[]):
+        """
+        Find a package dependencies with a possibility to choose
+        also the optional package given.
+
+        pkg: the package dictionnary
+        optional_keys: list of key that we have also to take into account
+        return a list of a package one-level dependencies
+        """
         dep = []
         depend_keys = ['Pre-Depends', 'Depends']
         for key in depend_keys:
@@ -92,6 +132,13 @@ class Packages:
         return dep
 
     def find_package(self, pkg_name):
+        """
+        Search a package in the packages list
+
+        pkg_name: the name of the package to find
+        return the pkg dictionnary
+        throw PackageNotFoundError if we can't find the package
+        """
         keys = ['Package', 'Source', 'Replaces', 'Provides']
 
         for pkg in self.packages:
