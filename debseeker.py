@@ -48,7 +48,6 @@ if __name__ == '__main__':
             package''', action='store_true')
 
     args = parser.parse_args()
-    print(args)
 
     pkg_handler = Packages()
 
