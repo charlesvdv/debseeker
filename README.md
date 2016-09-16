@@ -1,37 +1,32 @@
 # deseeker
 
-*debseeker* allow you to search Debian package without installing a VM and use *aptitude*.
+*debseeker* allow you to find easily all the dependencies of a Debian package 
+without installing any VM.
 
-You can also find dependencies of Debian package.
+# Why?
+
+Working on an archlinux system, I needed the dependencies for some Debian packages
+for embedding an application in a UML (User-Mode Linux: linux kernel running as an 
+application on a linux system). The project is named
+[pythia](https://github.com/pythia-project/pythia-core) and mostly the 
+[environments](https://github.com/pythia-project/environments) parts.
 
 # Usage
 
 *debseeker* main help
 ```
-$ python debseeker.py --help
-usage: debseeker.py [-h] [-u] {search,dependencies} ...
+$ python debseeker.py -h
+usage: debseeker.py [-h] [-u] {dependencies} ...
 
 debseeker is a Debian package finder
 
 positional arguments:
-  {search,dependencies}
-    search              search if given packages exist
-    dependencies        find dependencies for given packages
+  {dependencies}
+    dependencies  find dependencies for given packages
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -u, --update          update the packages data
-```
-
-Update the packages data and search if *gcc* and *pkg-not-existing* exist or not.
-```
-$ python debseeker.py -u search gcc pkg-not-existing
-Downloading packages information... Done
-Beginning initializing... Done
-
-package found: gcc
-
-Can't find package pkg-not-existing
+  -h, --help      show this help message and exit
+  -u, --update    update the packages data
 ```
 
 Search for the dependencies of *gcc* and *make*
