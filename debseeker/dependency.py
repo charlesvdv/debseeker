@@ -4,12 +4,19 @@ class DependencySeeker:
     def __init__(self, pkgs):
         self.pkgs = pkgs
         self.searcher = PackageSeeker(self.pkgs)
+        # Already checked package during the dependency check.
+        # Allow to improve performance while checking for optional pkg.
+        self._checked = set()
 
     def get_dependencies(self, pkgname, optional_dep=False):
         """
         Search recursively for the dependencies of the package.
+
+        Return the dependencies for a given package and also the
+        optional dependencies (which still need to be searched over).
         """
         dependencies = set()
+        optional_dependencies = set()
 
         to_check = set([pkgname])
         while len(to_check) > 0:
@@ -22,22 +29,31 @@ class DependencySeeker:
 
             if type(pkg) is list:
                 # In case of a Source package, we have multiple package.
-                dependencies.add(pkg[0].get_name())
-                if len(pkg) > 1:
-                    to_check.add([p.get_name() for p in pkg[1:]])
+                to_check.update([p.get_name() for p in pkg[1:]])
                 pkg = pkg[0]
-            else:
-                dependencies.add(pkg.get_name())
+
+            self._checked.add(pkg.get_name())
+            dependencies.add(pkg.get_name())
 
             pkgdeps = pkg.get_required_dependencies()
-            if optional_dep:
-                pkgdeps += pkg.get_optional_dependencies()
+            optional_dependencies.update(pkg.get_optional_dependencies())
 
             for dep in pkgdeps:
-                if dep not in dependencies:
+                if dep not in self._checked:
                     to_check.add(dep)
-        return dependencies
 
+        # Recursively search for the optional dependencies
+        if optional_dep and len(optional_dependencies) > 0:
+            # Clean the optional package to remove already checked package
+            optional_dependencies -= self._checked
+            for opt_pkg in optional_dependencies:
+                # As an optional package is not that important, it's not a problem 
+                # if the user can't find it. We just print a warning to the user.
+                try:
+                    dependencies.update(self.get_dependencies(opt_pkg))
+                except PackageNotFoundError as e:
+                    print('Can\'t find optional package or his dependencies: *%s*' % e.pkgnotfound)
+        return dependencies
 
     def _get_less_dependencies_pkg(self, *pkgs):
         """
@@ -66,7 +82,7 @@ class DependencySeeker:
     def _handle_or_dependencies(self, or_dep):
         """
         An OR dependencies is multiple package possible to be the
-        dependency of a given package. We have split them and choose 
+        dependency of a given package. We have split them and choose
         one between all of them.
         """
         orpkgs = [pkg.strip() for pkg in or_dep.split('|')]
