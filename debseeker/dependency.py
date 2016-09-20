@@ -13,10 +13,15 @@ class DependencySeeker:
 
         to_check = set([pkgname])
         while len(to_check) > 0:
-            pkg = self.searcher.find_dependency(to_check.pop())
+            currentcheck = to_check.pop()
+            if '|' in currentcheck:
+                # We have an OR dependencies.
+                pkg = self._handle_or_dependencies(currentcheck)
+            else:
+                pkg = self.searcher.find_dependency(currentcheck)
 
             if type(pkg) is list:
-                # in case of a Source package, we have multiple package.
+                # In case of a Source package, we have multiple package.
                 dependencies.add(pkg[0].get_name())
                 if len(pkg) > 1:
                     to_check.add([p.get_name() for p in pkg[1:]])
@@ -29,9 +34,6 @@ class DependencySeeker:
                 pkgdeps += pkg.get_optional_dependencies()
 
             for dep in pkgdeps:
-                if '|' in dep:
-                    # We have an OR dependencies.
-                    dep = self._handle_or_dependencies(dep)
                 if dep not in dependencies:
                     to_check.add(dep)
         return dependencies
@@ -42,7 +44,7 @@ class DependencySeeker:
         Choose the OR dependency that has the least amount
         of dependency at the first level.
         """
-        best = ''
+        best = None
         bestscore = 100
         for pkgname in pkgs[0]:
             try:
@@ -51,11 +53,11 @@ class DependencySeeker:
                     # Handle Source package
                     for sourcepkg in pkg:
                         if len(sourcepkg.get_required_dependencies()) < bestscore:
-                            best = sourcepkg.get_name()
+                            best = sourcepkg
                             bestscore = len(sourcepkg.get_required_dependencies())
                 else:
                     if len(pkg.get_required_dependencies()) < bestscore:
-                        best = pkg.get_name()
+                        best = pkg
                         bestscore = len(pkg.get_required_dependencies())
             except PackageNotFoundError:
                 pass
