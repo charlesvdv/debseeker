@@ -1,4 +1,5 @@
 from .search import PackageSeeker, PackageNotFoundError
+from .package import Package
 
 class DependencySeeker:
     def __init__(self, pkgs):
@@ -60,7 +61,8 @@ class DependencySeeker:
         Choose the OR dependency that has the least amount
         of dependency at the first level.
         """
-        best = None
+        best = Package(dict())
+        bestname = ''
         bestscore = 100
         for pkgname in pkgs[0]:
             try:
@@ -68,12 +70,16 @@ class DependencySeeker:
                 if type(pkg) is list:
                     # Handle Source package
                     for sourcepkg in pkg:
-                        if len(sourcepkg.get_required_dependencies()) < bestscore:
+                        if len(sourcepkg.get_required_dependencies()) <= bestscore and \
+                                sourcepkg.get_search_score() >= best.get_search_score():
                             best = sourcepkg
+                            bestname = pkgname
                             bestscore = len(sourcepkg.get_required_dependencies())
                 else:
-                    if len(pkg.get_required_dependencies()) < bestscore:
+                    if len(pkg.get_required_dependencies()) <= bestscore and \
+                            pkg.get_search_score() >= best.get_search_score():
                         best = pkg
+                        bestname = pkgname
                         bestscore = len(pkg.get_required_dependencies())
             except PackageNotFoundError:
                 pass
