@@ -8,12 +8,14 @@ class Package:
 
     def __init__(self, dict_pkg):
         self.pkg = dict_pkg
+        if len(dict_pkg) > 0:
+            self.name = self.pkg['Package']
 
     def get_dict(self):
         return self.pkg
 
     def get_name(self):
-        return self.pkg['Package']
+        return self.name
 
     def get_optional_dependencies(self):
         return self._get_values_by_keys(self.OPTIONAL_DEP_KEYS)
