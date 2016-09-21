@@ -18,6 +18,7 @@ class PackageSeeker:
         # Search for direct name hit
         for pkg in self.pkgs:
             if pkg.get_name() == pkgname:
+                pkg.set_search_score(100)
                 return pkg
 
         # Search for Source directory package.
@@ -27,6 +28,7 @@ class PackageSeeker:
         for pkg in self.pkgs:
             if pkg.is_info_exist('Source') and \
                     pkg.get_source() == pkgname:
+                pkg.set_search_score(50)
                 pkgsources.append(pkg)
         if len(pkgsources) != 0:
             return pkgsources
@@ -36,6 +38,7 @@ class PackageSeeker:
         for pkg in self.pkgs:
             for pkgprov in pkg.get_provides():
                 if pkgprov == pkgname:
+                    pkg.set_search_score(25)
                     return pkg
 
         # In very very last resort, we check if we not have a
@@ -44,6 +47,7 @@ class PackageSeeker:
         for pkg in self.pkgs:
             for pkgconf in pkg.get_conflicts():
                 if pkgconf == pkgname:
+                    pkg.set_search_score(12)
                     return pkg
 
         raise PackageNotFoundError('No package was found by the name: ' + pkgname, pkgname)

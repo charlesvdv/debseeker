@@ -4,6 +4,7 @@ class Package:
     PROVIDES_KEY = 'Provides'
     SOURCE_KEY = 'Source'
     CONFLICT_KEY = 'Conflicts'
+    SEARCH_SCORE_KEY = 'searchscore'
 
     def __init__(self, dict_pkg):
         self.pkg = dict_pkg
@@ -33,6 +34,14 @@ class Package:
         if self.CONFLICT_KEY in self.pkg:
             return self.pkg[self.CONFLICT_KEY]
         return []
+
+    def get_search_score(self):
+        if self.SEARCH_SCORE_KEY in self.pkg:
+            return self.pkg[self.SEARCH_SCORE_KEY]
+        return 0
+
+    def set_search_score(self, score):
+        self.pkg[self.SEARCH_SCORE_KEY] = score
 
     def is_info_exist(self, infokey):
         return infokey in self.pkg
