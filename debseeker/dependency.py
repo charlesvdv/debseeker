@@ -22,6 +22,10 @@ class DependencySeeker:
         to_check = set([pkgname])
         while len(to_check) > 0:
             currentcheck = to_check.pop()
+            if currentcheck in self._checked:
+                continue
+            self._checked.add(currentcheck)
+
             if '|' in currentcheck:
                 # We have an OR dependencies.
                 pkg = self._handle_or_dependencies(currentcheck)
@@ -33,7 +37,6 @@ class DependencySeeker:
                 to_check.update([p.get_name() for p in pkg[1:]])
                 pkg = pkg[0]
 
-            self._checked.add(pkg.get_name())
             dependencies.add(pkg.get_name())
 
             pkgdeps = pkg.get_required_dependencies()
