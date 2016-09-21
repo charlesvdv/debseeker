@@ -59,7 +59,7 @@ class DependencySeeker:
                     print('Can\'t find optional package or his dependencies: *%s*' % e.pkgnotfound)
         return dependencies
 
-    def _get_less_dependencies_pkg(self, *pkgs):
+    def _get_less_dependencies_pkg(self, pkgs):
         """
         Choose the OR dependency that has the least amount
         of dependency at the first level.
@@ -67,7 +67,7 @@ class DependencySeeker:
         best = Package(dict())
         bestname = ''
         bestscore = 100
-        for pkgname in pkgs[0]:
+        for pkgname in pkgs:
             try:
                 pkg = self.searcher.find_dependency(pkgname)
                 if type(pkg) is list:
@@ -87,7 +87,7 @@ class DependencySeeker:
             except PackageNotFoundError:
                 pass
         if len(best.get_dict()) == 0:
-            raise PackageNotFoundError('', ' '.join(pkgs[0]))
+            raise PackageNotFoundError('', ', '.join(pkgs))
         return best
 
     def _handle_or_dependencies(self, or_dep):
