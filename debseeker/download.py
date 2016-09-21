@@ -7,7 +7,7 @@ import time
 import urllib.error
 import urllib.request
 
-URL_PACKAGES = 'http://ftp.us.debian.org/debian/dists/stable/main/binary-all/Packages.gz'
+URL_PACKAGES = 'http://ftp.us.debian.org/debian/dists/stable/main/binary-amd64/Packages.gz'
 PACKAGE_PATH = '%s/Packages' % appdirs.user_cache_dir()
 PACKAGE_ARCHIVES_PATH = '%s/Packages.gz' % tempfile.gettempdir()
 
