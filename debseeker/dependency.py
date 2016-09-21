@@ -83,6 +83,8 @@ class DependencySeeker:
                         bestscore = len(pkg.get_required_dependencies())
             except PackageNotFoundError:
                 pass
+        if len(best.get_dict()) == 0:
+            raise PackageNotFoundError('', ' '.join(pkgs[0]))
         return best
 
     def _handle_or_dependencies(self, or_dep):
