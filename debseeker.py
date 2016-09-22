@@ -23,12 +23,14 @@ if __name__ == '__main__':
     dep_parser.add_argument('packages', nargs='*')
     #  dep_parser.add_argument('-o', '--or-dependency', help='''allow choosing the or dependencies
     #                           of the package''', action='store_true')
-    dep_parser.add_argument('-p', '--optional-package', help='''pick also the falcultative
+    dep_parser.add_argument('-o', '--optional-package', help='''pick also the falcultative
             package''', action='store_true')
+    dep_parser.add_argument('-a', '--architecture', help='''choose an architecture (amd64 is
+                            default)''', nargs=1, default=['amd64'])
 
     args = parser.parse_args()
 
-    pkgpath = pkgdownloader.check_packages_update(args.update)
+    pkgpath = pkgdownloader.check_packages_update(args.update, args.architecture[0])
 
     sys.stdout.write('Beginning initializing... ')
     pkgs = pkgparser.parse(pkgpath)
